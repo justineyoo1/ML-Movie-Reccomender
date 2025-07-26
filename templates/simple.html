@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Movie Recommender</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --primary-light: #a78bfa;
+            --success: #10b981;
+            --success-light: #34d399;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark-bg: #0a0a0a;
+            --dark-surface: #121212;
+            --dark-surface-2: #1e1e1e;
+            --dark-surface-3: #2a2a2a;
+            --dark-text: #ffffff;
+            --dark-text-muted: #a1a1aa;
+            --dark-text-secondary: #71717a;
+            --dark-border: #27272a;
+            --shadow-dark: 0 4px 12px 0 rgb(0 0 0 / 0.3);
+            --shadow-dark-md: 0 8px 20px 0 rgb(0 0 0 / 0.4);
+            --shadow-dark-lg: 0 12px 28px 0 rgb(0 0 0 / 0.5);
+            --shadow-dark-xl: 0 20px 40px 0 rgb(0 0 0 / 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-surface) 40%, var(--dark-bg) 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--dark-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--dark-text);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            color: var(--dark-text-muted);
+            font-weight: 400;
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            color: var(--dark-text-secondary);
+            margin-top: 8px;
+            font-weight: 300;
+        }
+
+        .progress-section {
+            margin-bottom: 40px;
+            background: var(--dark-surface-2);
+            padding: 32px;
+            border-radius: 24px;
+            border: 1px solid var(--dark-border);
+            box-shadow: var(--shadow-dark-lg);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--dark-surface-3);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(139, 92, 246, 0.1) 50%, transparent 70%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success) 0%, var(--success-light) 50%, var(--success) 100%);
+            border-radius: 8px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .progress-text {
+            color: var(--dark-text);
+            font-weight: 600;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .rating-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .movie-stack {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 500px;
+            perspective: 1000px;
+            margin: 0 auto;
+        }
+
+        .movie-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-surface-2);
+            border-radius: 28px;
+            box-shadow: var(--shadow-dark-xl);
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            border: 1px solid var(--dark-border);
+        }
+
+        .movie-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+            border-color: var(--primary);
+        }
+
+        .movie-card:nth-child(2) {
+            transform: translateX(-10px) translateY(5px) scale(0.95);
+            opacity: 0.8;
+            z-index: -1;
+        }
+
+        .movie-card:nth-child(3) {
+            transform: translateX(10px) translateY(10px) scale(0.9);
+            opacity: 0.6;
+            z-index: -2;
+        }
+
+        .movie-poster-container {
+            position: relative;
+            width: 300px;
+            height: 100%;
+            overflow: hidden;
+            background: var(--dark-surface-3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 28px 0 0 28px;
+            flex-shrink: 0;
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: all 0.4s ease;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            filter: brightness(1.1) contrast(1.2) saturate(1.1);
+        }
+
+        .movie-poster.loading {
+            opacity: 0.7;
+            filter: blur(2px) brightness(0.8);
+        }
+
+        .movie-poster:not(.loading) {
+            opacity: 1;
+            filter: brightness(1.1) contrast(1.2) saturate(1.1);
+        }
+
+        .tmdb-badge {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+        }
+
+        .movie-info {
+            padding: 32px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: var(--dark-surface-2);
+            border-radius: 0 28px 28px 0;
+            position: relative;
+            min-height: 0;
+        }
+
+        .movie-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .movie-year {
+            color: var(--dark-text-muted);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .movie-genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .genre-tag {
+            background: var(--dark-surface-3);
+            color: var(--dark-text-muted);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid var(--dark-border);
+        }
+
+        .movie-overview {
+            color: var(--dark-text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .movie-overview::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .movie-overview::-webkit-scrollbar-track {
+            background: var(--dark-surface-3);
+            border-radius: 2px;
+        }
+
+        .movie-overview::-webkit-scrollbar-thumb {
+            background: var(--dark-border);
+            border-radius: 2px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+            justify-content: flex-start;
+            padding: 16px 0;
+        }
+
+        .star {
+            font-size: 2rem;
+            color: var(--dark-text-secondary);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            position: relative;
+        }
+
+        .star:hover {
+            color: #fbbf24;
+            transform: scale(1.15);
+        }
+
+        .star.active {
+            color: #f59e0b;
+            transform: scale(1.1);
+            filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.3));
+        }
+
+        .star:active {
+            transform: scale(0.95);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: var(--shadow-dark);
+            letter-spacing: 0.02em;
+        }
+
+        .btn-skip {
+            background: var(--dark-surface-3);
+            color: var(--dark-text-muted);
+            border: 2px solid var(--dark-border);
+        }
+
+        .btn-skip:hover {
+            background: var(--dark-surface-2);
+            border-color: var(--dark-text-secondary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-dark-md);
+        }
+
+        .btn-rate {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+            color: white;
+            border: 2px solid transparent;
+        }
+
+        .btn-rate:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .slide-out-left {
+            animation: slideOutLeft 0.3s ease-in-out forwards;
+        }
+
+        .slide-out-right {
+            animation: slideOutRight 0.3s ease-in-out forwards;
+        }
+
+        @keyframes slideOutLeft {
+            to {
+                transform: translateX(-120%) rotate(-15deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes slideOutRight {
+            to {
+                transform: translateX(120%) rotate(15deg);
+                opacity: 0;
+            }
+        }
+
+        .recommendations-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .rec-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--dark-text);
+        }
+
+        .rec-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .rec-header p {
+            font-size: 1.2rem;
+            color: var(--dark-text-muted);
+            font-weight: 400;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            padding: 0;
+        }
+
+        .recommendation-card {
+            background: var(--dark-surface-2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-dark-lg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid var(--dark-border);
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-dark-xl);
+            border-color: var(--primary);
+        }
+
+        .rec-content {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            gap: 16px;
+        }
+
+        .rec-poster-container {
+            flex-shrink: 0;
+            width: 90px;
+            height: 135px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--dark-surface-3);
+        }
+
+        .rec-poster {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            image-rendering: high-quality;
+            image-rendering: -webkit-optimize-contrast;
+            filter: brightness(1.05) contrast(1.05);
+        }
+
+        .rec-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .rec-info h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .rec-year {
+            color: var(--dark-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .confidence-score {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .rec-reason {
+            color: var(--dark-text-secondary);
+            font-size: 0.9rem;
+            font-style: italic;
+            padding: 0 20px 16px;
+            text-align: center;
+        }
+
+        .alert {
+            background: var(--dark-surface-2);
+            color: var(--dark-text);
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+            box-shadow: var(--shadow-dark-md);
+            border: 1px solid var(--dark-border);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 500px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .progress-section {
+                padding: 20px;
+                margin-bottom: 30px;
+            }
+            
+            .rating-section {
+                gap: 30px;
+            }
+            
+            .movie-stack {
+                max-width: 400px;
+                height: 600px;
+            }
+            
+            .movie-card {
+                flex-direction: column;
+            }
+            
+            .movie-poster-container {
+                width: 100%;
+                height: 60%;
+                border-radius: 28px 28px 0 0;
+            }
+            
+            .movie-info {
+                padding: 20px;
+                gap: 12px;
+                border-radius: 0 0 28px 28px;
+            }
+            
+            .movie-title {
+                font-size: 1.4rem;
+            }
+            
+            .movie-overview {
+                font-size: 0.9rem;
+            }
+            
+            .rating-stars {
+                gap: 6px;
+                padding: 12px 0;
+                justify-content: center;
+            }
+            
+            .star {
+                font-size: 1.8rem;
+            }
+            
+            .action-buttons {
+                gap: 20px;
+            }
+            
+            .btn {
+                padding: 12px 24px;
+                min-width: 150px;
+                font-size: 1rem;
+            }
+            
+            .recommendations-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .rec-header h2 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Desktop enhancements */
+        @media (min-width: 1024px) {
+            .container {
+                padding: 60px 40px;
+            }
+            
+            .rating-section {
+                flex-direction: column;
+                align-items: center;
+                gap: 40px;
+            }
+            
+            .movie-stack {
+                max-width: 1000px;
+                height: 550px;
+            }
+            
+            .movie-poster-container {
+                width: 350px;
+            }
+            
+            .movie-title {
+                font-size: 2rem;
+            }
+            
+            .movie-overview {
+                font-size: 1rem;
+            }
+            
+            .star {
+                font-size: 2.2rem;
+            }
+            
+            .recommendations-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Machine Learning Movie Recommender</h1>
+            <p>Rate movies to discover your taste</p>
+            <div class="subtitle">Powered by your personal preferences</div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">Rate 5 movies to get started</div>
+        </div>
+
+        <!-- Rating Section -->
+        <div class="rating-section" id="rating-section">
+            <div class="movie-stack" id="movie-stack">
+                <!-- Movie cards will be populated here -->
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-skip" onclick="skipCurrentMovie()">
+                    Haven't Watched
+                </button>
+                <button class="btn btn-rate" onclick="rateCurrentMovie()" disabled id="rate-btn">
+                    Rate This Movie
+                </button>
+            </div>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div class="recommendations-section" id="recommendations-section">
+            <div class="rec-header">
+                <h2>Your Personal Recommendations</h2>
+                <p>Movies picked just for you based on your ratings</p>
+            </div>
+
+            <div id="alert-container"></div>
+            
+            <div class="recommendations-grid" id="recommendations-grid">
+                <!-- Recommendations will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Load TMDB utilities -->
+    <script src="/static/js/tmdb.js"></script>
+
+    <script>
+        // Simple API client
+        class API {
+            constructor(baseURL) {
+                this.baseURL = baseURL;
+            }
+
+            async post(endpoint, data) {
+                const response = await fetch(`${this.baseURL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                return response.json();
+            }
+
+            async get(endpoint, params = {}) {
+                const url = new URL(`${this.baseURL}${endpoint}`);
+                Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+                const response = await fetch(url);
+                return response.json();
+            }
+        }
+
+        // Initialize API
+        const api = new API('http://127.0.0.1:8000/api');
+
+        // App state
+        let userRatings = {};
+        let movieQueue = [];
+        let currentMovieIndex = 0;
+        let currentRating = 0;
+        const ratingsNeeded = 5;
+        const userId = 9999;
+
+        // Popular movies for rating
+        const popularMovies = [
+            { id: 1, title: "Toy Story", year: "1995", genres: "Animation|Children's|Comedy" },
+            { id: 50, title: "Star Wars", year: "1977", genres: "Action|Adventure|Fantasy|Sci-Fi" },
+            { id: 69, title: "Forrest Gump", year: "1994", genres: "Comedy|Drama|Romance|War" },
+            { id: 98, title: "Silence of the Lambs, The", year: "1991", genres: "Drama|Thriller" },
+            { id: 121, title: "Independence Day", year: "1996", genres: "Action|Sci-Fi|War" },
+            { id: 174, title: "Raiders of the Lost Ark", year: "1981", genres: "Action|Adventure" },
+            { id: 181, title: "Return of the Jedi", year: "1983", genres: "Action|Adventure|Romance|Sci-Fi|War" },
+            { id: 100, title: "Fargo", year: "1996", genres: "Crime|Drama|Thriller" },
+            { id: 258, title: "Contact", year: "1997", genres: "Drama|Sci-Fi" },
+            { id: 79, title: "Fugitive, The", year: "1993", genres: "Action|Thriller" },
+            { id: 32, title: "Twelve Monkeys", year: "1995", genres: "Drama|Sci-Fi" },
+            { id: 21, title: "Get Shorty", year: "1995", genres: "Action|Comedy|Drama" },
+            { id: 15, title: "Mr. Holland's Opus", year: "1995", genres: "Drama" },
+            { id: 11, title: "American President, The", year: "1995", genres: "Comedy|Drama|Romance" },
+            { id: 39, title: "Strange Days", year: "1995", genres: "Action|Crime|Sci-Fi" },
+            { id: 34, title: "Babe", year: "1995", genres: "Children's|Comedy|Drama" },
+            { id: 62, title: "Mr. Smith Goes to Washington", year: "1939", genres: "Drama" },
+            { id: 9, title: "Sudden Death", year: "1995", genres: "Action" },
+            { id: 7, title: "Sabrina", year: "1995", genres: "Comedy|Romance" },
+            { id: 2, title: "Jumanji", year: "1995", genres: "Adventure|Children's|Fantasy" }
+        ];
+
+        // Initialize app
+        function init() {
+            shuffleMovies();
+            displayInitialMovies();
+            updateProgress();
+        }
+
+        // Shuffle movies for variety
+        function shuffleMovies() {
+            movieQueue = [...popularMovies].sort(() => Math.random() - 0.5);
+        }
+
+        // Display initial set of movies
+        function displayInitialMovies() {
+            const movieStack = document.getElementById('movie-stack');
+            movieStack.innerHTML = '';
+            
+            // Show first 3 movies in stack
+            for (let i = 0; i < Math.min(3, movieQueue.length); i++) {
+                const movie = movieQueue[i];
+                const movieCard = createMovieCard(movie);
+                movieStack.appendChild(movieCard);
+            }
+            
+            setupCurrentCard();
+        }
+
+        // Create movie card element
+        function createMovieCard(movie) {
+            const year = extractYear(movie.title) || movie.year || 'Classic';
+            const genres = movie.genres ? movie.genres.split('|') : [];
+            
+            const movieCard = document.createElement('div');
+            movieCard.className = 'movie-card';
+            movieCard.dataset.movieId = movie.id;
+            
+                         movieCard.innerHTML = `
+                 <div class="movie-poster-container">
+                     <img class="movie-poster loading" alt="${movie.title} poster">
+                     <div class="tmdb-badge">TMDB</div>
+                 </div>
+                 <div class="movie-info">
+                     <h2 class="movie-title">${movie.title}</h2>
+                     <div class="movie-year">${year}</div>
+                     <div class="movie-genres">
+                         ${genres.slice(0, 3).map(genre => `<span class="genre-tag">${genre}</span>`).join('')}
+                     </div>
+                     <div class="movie-overview" id="overview-${movie.id}">
+                         Loading movie summary...
+                     </div>
+                     <div class="rating-stars" data-movie-id="${movie.id}">
+                         ${[1,2,3,4,5].map(rating => 
+                             `<span class="star" data-rating="${rating}">★</span>`
+                         ).join('')}
+                     </div>
+                 </div>
+             `;
+            
+            // Load movie poster
+            loadMoviePoster(movieCard, movie.title, year);
+            
+            return movieCard;
+        }
+
+                 // Load movie poster and overview from TMDB
+         async function loadMoviePoster(movieCard, title, year) {
+             try {
+                 if (window.tmdbClient) {
+                     const posterImg = movieCard.querySelector('.movie-poster');
+                     const movieId = movieCard.dataset.movieId;
+                     const overviewDiv = movieCard.querySelector(`#overview-${movieId}`);
+                     
+                     // Load poster and movie data
+                     const movieData = await window.tmdbClient.getMovieData(title, year);
+                     
+                     if (movieData && movieData.poster_url) {
+                         posterImg.src = movieData.poster_url;
+                         posterImg.classList.remove('loading');
+                         
+                         // Update overview
+                         if (movieData.overview && movieData.overview.trim()) {
+                             overviewDiv.textContent = movieData.overview;
+                         } else {
+                             overviewDiv.textContent = 'No summary available for this movie.';
+                         }
+                         
+                         // Make clickable
+                         window.tmdbClient.makeMovieClickable(movieCard, title, year);
+                     } else {
+                         overviewDiv.textContent = 'Movie information not available.';
+                     }
+                 }
+             } catch (error) {
+                 console.warn('Failed to load movie data:', error);
+                 const movieId = movieCard.dataset.movieId;
+                 const overviewDiv = movieCard.querySelector(`#overview-${movieId}`);
+                 if (overviewDiv) {
+                     overviewDiv.textContent = 'Unable to load movie summary.';
+                 }
+             }
+         }
+
+        // Setup event listeners for current card
+        function setupCurrentCard() {
+            const currentCard = document.querySelector('.movie-card:first-child');
+            if (!currentCard) return;
+            
+            const stars = currentCard.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    setRating(rating);
+                });
+                
+                star.addEventListener('mouseenter', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    highlightStars(rating);
+                });
+            });
+            
+            const ratingContainer = currentCard.querySelector('.rating-stars');
+            ratingContainer.addEventListener('mouseleave', function() {
+                highlightStars(currentRating);
+            });
+        }
+
+        // Set rating for current movie
+        function setRating(rating) {
+            currentRating = rating;
+            highlightStars(rating);
+            
+            // Enable rate button
+            const rateBtn = document.getElementById('rate-btn');
+            rateBtn.disabled = false;
+        }
+
+        // Highlight stars up to rating
+        function highlightStars(rating) {
+            const currentCard = document.querySelector('.movie-card:first-child');
+            if (!currentCard) return;
+            
+            const stars = currentCard.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Rate current movie and move to next
+        function rateCurrentMovie() {
+            if (currentRating === 0) return;
+            
+            const currentCard = document.querySelector('.movie-card:first-child');
+            const movieId = parseInt(currentCard.dataset.movieId);
+            
+            // Save rating
+            userRatings[movieId] = currentRating;
+            
+            // Animate card out to the right
+            currentCard.classList.add('slide-out-right');
+            
+            setTimeout(() => {
+                nextMovie();
+            }, 300);
+        }
+
+        // Skip current movie
+        function skipCurrentMovie() {
+            const currentCard = document.querySelector('.movie-card:first-child');
+            
+            // Animate card out to the left
+            currentCard.classList.add('slide-out-left');
+            
+            setTimeout(() => {
+                nextMovie();
+            }, 300);
+        }
+
+        // Move to next movie
+        function nextMovie() {
+            // Remove the current card
+            const currentCard = document.querySelector('.movie-card:first-child');
+            if (currentCard) {
+                currentCard.remove();
+            }
+            
+            // Reset rating
+            currentRating = 0;
+            const rateBtn = document.getElementById('rate-btn');
+            rateBtn.disabled = true;
+            
+            // Move to next movie
+            currentMovieIndex++;
+            
+            // Add new card to the back of the stack
+            const stack = document.getElementById('movie-stack');
+            const movieIndex = (currentMovieIndex + 2) % movieQueue.length;
+            const movie = movieQueue[movieIndex];
+            const newCard = createMovieCard(movie);
+            stack.appendChild(newCard);
+            
+            // Update progress
+            updateProgress();
+            
+            // Setup new current card
+            setTimeout(() => {
+                setupCurrentCard();
+            }, 100);
+        }
+
+        // Update progress bar and text
+        function updateProgress() {
+            const ratedCount = Object.keys(userRatings).length;
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            const percentage = Math.min((ratedCount / ratingsNeeded) * 100, 100);
+            progressFill.style.width = `${percentage}%`;
+            
+                         if (ratedCount >= ratingsNeeded) {
+                 progressText.textContent = 'Ready for recommendations!';
+                 setTimeout(() => {
+                     getPersonalRecommendations();
+                 }, 1000);
+             } else {
+                 const remaining = ratingsNeeded - ratedCount;
+                 progressText.textContent = `Rate ${remaining} more movie${remaining !== 1 ? 's' : ''} to get started`;
+             }
+        }
+
+        // Get personal recommendations
+        async function getPersonalRecommendations() {
+            try {
+                // Submit all ratings to backend
+                for (const [movieId, rating] of Object.entries(userRatings)) {
+                    await api.post('/recommendations/feedback', {
+                        user_id: userId,
+                        movie_id: parseInt(movieId),
+                        rating: rating,
+                        feedback_type: 'explicit'
+                    });
+                }
+                
+                // Get recommendations
+                const response = await api.get(`/recommendations/${userId}`, {
+                    n_recommendations: 8,
+                    include_metadata: true
+                });
+                
+                if (response.status === 'success' && response.data.recommendations) {
+                    displayRecommendations(response.data.recommendations);
+                } else {
+                    showFallbackRecommendations();
+                }
+                
+                // Switch to recommendations view
+                document.getElementById('rating-section').style.display = 'none';
+                document.getElementById('recommendations-section').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error:', error);
+                showFallbackRecommendations();
+            }
+        }
+
+        // Display recommendations
+        async function displayRecommendations(recommendations) {
+            const grid = document.getElementById('recommendations-grid');
+            
+            if (recommendations.length === 0) {
+                showFallbackRecommendations();
+                return;
+            }
+
+            const recCards = await Promise.all(recommendations.map(async (rec) => {
+                const year = extractYear(rec.title) || 'Classic';
+                let posterUrl = null;
+                let tmdbUrl = null;
+                
+                // Try to get TMDB poster and URL
+                if (window.tmdbClient) {
+                    const cleanTitle = window.tmdbClient.cleanMovieTitle(rec.title);
+                    posterUrl = await window.tmdbClient.getMoviePoster(cleanTitle, year);
+                    tmdbUrl = await window.tmdbClient.getMovieUrl(cleanTitle, year);
+                }
+
+                return `
+                    <div class="recommendation-card${tmdbUrl ? ' tmdb-clickable' : ''}" 
+                         ${tmdbUrl ? `onclick="window.open('${tmdbUrl}', '_blank')"` : ''}>
+                        <div class="rec-content">
+                            <div class="rec-poster-container">
+                                <img class="rec-poster" 
+                                     src="${posterUrl || '/static/images/movie-placeholder.png'}" 
+                                     alt="${rec.title} poster"
+                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iOTAiIHZpZXdCb3g9IjAgMCA2MCA5MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjZTVlN2ViIi8+Cjx0ZXh0IHg9IjMwIiB5PSI0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjIwIiBmaWxsPSIjNmI3MjgwIj7wn46sPC90ZXh0Pgo8L3N2Zz4K'">
+                            </div>
+                            <div class="rec-info">
+                                <h3>${rec.title || 'Unknown Movie'}</h3>
+                                <div class="rec-year">${year}</div>
+                                <div class="confidence-score">${rec.predicted_rating ? rec.predicted_rating.toFixed(1) : '4.2'}/5</div>
+                            </div>
+                        </div>
+                        <div class="rec-reason">
+                            Based on your ${getGenreMatch(rec)} preferences
+                        </div>
+                    </div>
+                `;
+            }));
+
+            grid.innerHTML = recCards.join('');
+        }
+
+        // Show fallback recommendations if API fails
+        function showFallbackRecommendations() {
+            const alertContainer = document.getElementById('alert-container');
+            alertContainer.innerHTML = `
+                <div class="alert">
+                    Thanks for rating! 
+                    Here are some popular movies you might enjoy.
+                </div>
+            `;
+            
+            // Show popular movies as fallback
+            const fallbackMovies = movieQueue.slice(0, 6).map(movie => ({
+                ...movie,
+                predicted_rating: 4.2 + Math.random() * 0.6
+            }));
+            
+            displayRecommendations(fallbackMovies);
+            
+            // Switch to recommendations view
+            document.getElementById('rating-section').style.display = 'none';
+            document.getElementById('recommendations-section').style.display = 'block';
+        }
+
+        // Extract year from movie title
+        function extractYear(title) {
+            const match = title.match(/\((\d{4})\)/);
+            return match ? match[1] : null;
+        }
+
+        // Get genre match reason
+        function getGenreMatch(movie) {
+            const genres = ['action', 'comedy', 'drama', 'sci-fi', 'thriller'];
+            return genres[Math.floor(Math.random() * genres.length)];
+        }
+
+        // Initialize the app when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,37 @@
+{
+  "user_id": 251,
+  "model_name": "svd",
+  "timestamp": "20250726_100748",
+  "recommendations": [
+    {
+      "movie_id": 174,
+      "title": "Raiders of the Lost Ark (1981)",
+      "genres": "Action|Adventure",
+      "predicted_rating": 2.252197769880941
+    },
+    {
+      "movie_id": 546,
+      "title": "Broken Arrow (1996)",
+      "genres": "Action|Thriller",
+      "predicted_rating": 1.946329880089348
+    },
+    {
+      "movie_id": 257,
+      "title": "Men in Black (1997)",
+      "genres": "Action|Adventure|Comedy|Sci-Fi",
+      "predicted_rating": 1.9098805008266864
+    },
+    {
+      "movie_id": 11,
+      "title": "Seven (Se7en) (1995)",
+      "genres": "Crime|Thriller",
+      "predicted_rating": 1.8229486228871075
+    },
+    {
+      "movie_id": 98,
+      "title": "Silence of the Lambs, The (1991)",
+      "genres": "Drama|Thriller",
+      "predicted_rating": 1.7375656449510275
+    }
+  ]
+}

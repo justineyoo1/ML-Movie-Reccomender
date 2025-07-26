@@ -1,0 +1,30 @@
+{
+  "model_type": "svd",
+  "training_params": {},
+  "training_results": {
+    "model_type": "SVD",
+    "n_components": 50,
+    "explained_variance_ratio": 0.4639349726715358,
+    "user_factors_shape": [
+      943,
+      50
+    ],
+    "item_factors_shape": [
+      1656,
+      50
+    ]
+  },
+  "data_stats": {
+    "num_ratings": 100000,
+    "num_users": 943,
+    "num_movies": 1682,
+    "avg_rating": 3.52986,
+    "rating_scale": [
+      1.0,
+      5.0
+    ],
+    "total_movies": 1682
+  },
+  "timestamp": "20250726_124940",
+  "datetime": "2025-07-26T12:49:40.553302"
+}
